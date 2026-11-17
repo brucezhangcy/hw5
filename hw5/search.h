@@ -7,10 +7,11 @@
 
 #pragma once
 
-#include "mothership.h"
-#include "seafloor_survey.h"
+#include <vector>
 
-// #include "examples/robot_selector.h" // EXAMPLE
+#include "mothership.h"
+#include "robot_queue.h"
+#include "seafloor_survey.h"
 
 class Search
 {
@@ -22,10 +23,26 @@ public:
 private:
   Mothership &mothership; // REQUIRED
 
-  SeafloorSurvey seafloorSurvey; // OPTIONAL
+  int robotCount;
+  SeafloorSurvey seafloorSurvey; // every debris found so far
+  RobotQueue robotQueue;         // AVL tree: which robot to drive next
 
-  // int robotsExplored = 0; // EXAMPLE
-  // RobotSelector robotSelector; // EXAMPLE
+  std::vector<int> pathEnd;       // last segment a robot can safely reach
+  std::vector<int> position;      // current segment of each robot
+  std::vector<int> transitTarget; // depth a robot should jump to (0 = none)
+  std::vector<char> isScout;      // scouts are explored first
 
-  // bool isReachable(int robot) const; // EXAMPLE
+  void setUp();
+  int leftOf(int robot) const;
+  int rightOf(int robot) const;
+
+  long long priorityOf(int robot) const;
+  long long stayLimit() const;
+  void refreshPriority(int robot);
+
+  bool driveStint(int robot);
+  void handleDebris(int robot);
+  void activateNeighbors(int robot);
+  void finishRobot(int robot);
+  void makeScout(int robot);
 };
